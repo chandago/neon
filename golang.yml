@@ -18,6 +18,7 @@ properties:
   TEST_OPTS: ['-cover']
   RUN_ARGS: []
   DOCKER_TAG: '={NAME}:latest'
+  DOCKER_OPTIONS: ''
   GOBINSEC_ENABLED: false
 
 targets:
@@ -97,7 +98,7 @@ targets:
         --build-arg SFBX_GIT_USERNAME=$SFBX_GIT_USERNAME
         --build-arg SFBX_GIT_PASSWORD=$SFBX_GIT_PASSWORD
         --tag ={DOCKER_TAG}
-        --no-cache
+        ={DOCKER_OPTIONS}
         .
 
   docker-lint:
@@ -109,8 +110,8 @@ targets:
         --build-arg SFBX_GIT_USERNAME=$SFBX_GIT_USERNAME
         --build-arg SFBX_GIT_PASSWORD=$SFBX_GIT_PASSWORD
         --tag ={DOCKER_TAG}
-        --no-cache
         --target lint
+        ={DOCKER_OPTIONS}
         .
 
   docker-test:
@@ -122,8 +123,8 @@ targets:
         --build-arg SFBX_GIT_USERNAME=$SFBX_GIT_USERNAME
         --build-arg SFBX_GIT_PASSWORD=$SFBX_GIT_PASSWORD
         --tag ={DOCKER_TAG}
-        --no-cache
         --target test
+        ={DOCKER_OPTIONS}
         .
 
   docker-gobinsec:
@@ -135,8 +136,8 @@ targets:
         --build-arg SFBX_GIT_USERNAME=$SFBX_GIT_USERNAME
         --build-arg SFBX_GIT_PASSWORD=$SFBX_GIT_PASSWORD
         --tag ={DOCKER_TAG}
-        --no-cache
         --target gobinsec
+        ={DOCKER_OPTIONS}
         .
 
   docker-build:
@@ -148,8 +149,8 @@ targets:
         --build-arg SFBX_GIT_USERNAME=$SFBX_GIT_USERNAME
         --build-arg SFBX_GIT_PASSWORD=$SFBX_GIT_PASSWORD
         --tag ={DOCKER_TAG}
-        --no-cache
         --target build
+        ={DOCKER_OPTIONS}
         .
 
   install:
