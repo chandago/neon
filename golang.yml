@@ -137,6 +137,10 @@ targets:
         --build-arg GOPRIVATE=$GOPRIVATE
         --build-arg SFBX_GIT_USERNAME=$SFBX_GIT_USERNAME
         --build-arg SFBX_GIT_PASSWORD=$SFBX_GIT_PASSWORD
+        --build-arg MEMCACHIER_ADDRESS=$MEMCACHIER_ADDRESS
+        --build-arg MEMCACHIER_USERNAME=$MEMCACHIER_USERNAME
+        --build-arg MEMCACHIER_PASSWORD=$MEMCACHIER_PASSWORD
+        --build-arg MEMCACHIER_EXPIRATION=$MEMCACHIER_EXPIRATION
         --tag ={DOCKER_TAG}
         --target gobinsec
         ={DOCKER_OPTIONS}
