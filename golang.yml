@@ -54,6 +54,7 @@ targets:
 
   gobinsec:
     doc: "Check binary for vulnerabilities"
+    depends: build
     steps:
     - if: GOBINSEC_ENABLED
       then:
