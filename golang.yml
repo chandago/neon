@@ -67,6 +67,7 @@ targets:
     doc: "Clean build directory and Go test cache"
     steps:
     - delete: =BUILD_DIR
+    - $: ['go', 'clean', '-cache']
     - $: ['go', 'clean', '-testcache']
 
   build:
