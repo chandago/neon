@@ -37,21 +37,18 @@ targets:
     steps:
     - print: "Linting Go code"
     - $: ['golangci-lint', 'run', =PACKAGE]
-    - print: '={color("Green", "OK")} go code checked'
 
   fmt:
     doc: "Format Go code"
     steps:
     - print: "Formatting Go source files"
     - $: ['gofmt', '-s', '-w', =PACKAGE_DIR]
-    - print: '={color("Green", "OK")} go code well formatted'
 
   test:
     doc: "Run Go tests"
     steps:
     - $: ['go', 'test']
       +: =TEST_OPTS+TEST_CASES
-    - print: '={color("Green", "OK")} unit tests pass'
 
   gobinsec:
     doc: "Check binary for vulnerabilities"
@@ -59,7 +56,6 @@ targets:
     - if: GOBINSEC_ENABLED
       then:
       - $: 'gobinsec -config .gobinsec.yml -wait $(find ={BUILD_DIR}/* -perm -u+x)'
-      - print: '={color("Green", "OK")} go code checked for vulnerabilities'
       else:
       - print: "Gobinsec check disabled"
 
