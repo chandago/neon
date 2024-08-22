@@ -10,6 +10,7 @@ properties:
   PACKAGE: './...'
   PACKAGE_DIR: '.'
   VERSION_PATH: 'main.Version'
+  LINT_TIMEOUT: 5m
   GOTOOLS:
   - github.com/mitchellh/gox@latest
   - github.com/golangci/golangci-lint/cmd/golangci-lint@latest
@@ -37,7 +38,7 @@ targets:
     doc: "Lint code with golangci-lint"
     steps:
     - print: "Linting Go code"
-    - $: ['golangci-lint', 'run', =PACKAGE]
+    - $: ['golangci-lint', 'run', '--timeout', =LINT_TIMEOUT, =PACKAGE]
 
   fmt:
     doc: "Format Go code"
