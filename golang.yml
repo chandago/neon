@@ -99,6 +99,54 @@ targets:
         --tag ={DOCKER_TAG}
         .
 
+  docker-lint:
+    doc: "Lint in Dockerfile"
+    steps:
+    - $: >
+        docker build
+        --build-arg GOPRIVATE=$GOPRIVATE
+        --build-arg SFBX_GIT_USERNAME=$SFBX_GIT_USERNAME
+        --build-arg SFBX_GIT_PASSWORD=$SFBX_GIT_PASSWORD
+        --tag ={DOCKER_TAG}
+        --target lint
+        .
+
+  docker-test:
+    doc: "Test in Dockerfile"
+    steps:
+    - $: >
+        docker build
+        --build-arg GOPRIVATE=$GOPRIVATE
+        --build-arg SFBX_GIT_USERNAME=$SFBX_GIT_USERNAME
+        --build-arg SFBX_GIT_PASSWORD=$SFBX_GIT_PASSWORD
+        --tag ={DOCKER_TAG}
+        --target test
+        .
+
+  docker-gobinsec:
+    doc: "Run gobinsec in Dockerfile"
+    steps:
+    - $: >
+        docker build
+        --build-arg GOPRIVATE=$GOPRIVATE
+        --build-arg SFBX_GIT_USERNAME=$SFBX_GIT_USERNAME
+        --build-arg SFBX_GIT_PASSWORD=$SFBX_GIT_PASSWORD
+        --tag ={DOCKER_TAG}
+        --target gobinsec
+        .
+
+  docker-build:
+    doc: "Build in Dockerfile"
+    steps:
+    - $: >
+        docker build
+        --build-arg GOPRIVATE=$GOPRIVATE
+        --build-arg SFBX_GIT_USERNAME=$SFBX_GIT_USERNAME
+        --build-arg SFBX_GIT_PASSWORD=$SFBX_GIT_PASSWORD
+        --tag ={DOCKER_TAG}
+        --target build
+        .
+
   install:
     doc: "Build and install binary in GOPATH"
     steps:
