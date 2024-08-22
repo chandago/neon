@@ -103,6 +103,10 @@ targets:
         ={DOCKER_OPTIONS}
         .
 
+  docker-all:
+    doc: "Lint, test, gobinsec and build in Docker image"
+    depends: [docker-lint, docker-test, docker-gobinsec, docker-build]
+
   docker-lint:
     doc: "Lint in Dockerfile"
     steps:
@@ -111,7 +115,6 @@ targets:
         --build-arg GOPRIVATE=$GOPRIVATE
         --build-arg SFBX_GIT_USERNAME=$SFBX_GIT_USERNAME
         --build-arg SFBX_GIT_PASSWORD=$SFBX_GIT_PASSWORD
-        --tag ={DOCKER_TAG}
         --target lint
         ={DOCKER_OPTIONS}
         .
@@ -124,7 +127,6 @@ targets:
         --build-arg GOPRIVATE=$GOPRIVATE
         --build-arg SFBX_GIT_USERNAME=$SFBX_GIT_USERNAME
         --build-arg SFBX_GIT_PASSWORD=$SFBX_GIT_PASSWORD
-        --tag ={DOCKER_TAG}
         --target test
         ={DOCKER_OPTIONS}
         .
@@ -141,7 +143,6 @@ targets:
         --build-arg MEMCACHIER_USERNAME=$MEMCACHIER_USERNAME
         --build-arg MEMCACHIER_PASSWORD=$MEMCACHIER_PASSWORD
         --build-arg MEMCACHIER_EXPIRATION=$MEMCACHIER_EXPIRATION
-        --tag ={DOCKER_TAG}
         --target gobinsec
         ={DOCKER_OPTIONS}
         .
@@ -154,7 +155,6 @@ targets:
         --build-arg GOPRIVATE=$GOPRIVATE
         --build-arg SFBX_GIT_USERNAME=$SFBX_GIT_USERNAME
         --build-arg SFBX_GIT_PASSWORD=$SFBX_GIT_PASSWORD
-        --tag ={DOCKER_TAG}
         --target build
         ={DOCKER_OPTIONS}
         .
