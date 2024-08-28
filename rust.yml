@@ -20,6 +20,7 @@ properties:
     aarch64-apple-darwin: darwin-arm64
     x86_64-apple-darwin: darwin-amd64
     x86_64-pc-windows-gnu: windows-amd64
+  DOCKER_OPTIONS: ''
 
 targets:
 
@@ -84,6 +85,49 @@ targets:
           --build-arg SFBX_GIT_PASSWORD=$SFBX_GIT_PASSWORD
           --target image
           --tag ={DOCKER_TAG}
+          ={DOCKER_OPTIONS}
+          .
+
+  docker-lint:
+    doc: "Lint code in docker"
+    steps:
+    - $: >
+          docker build
+          --build-arg SFBX_GIT_REPOSITORY=$SFBX_GIT_REPOSITORY
+          --build-arg SFBX_GIT_USERNAME=$SFBX_GIT_USERNAME
+          --build-arg SFBX_GIT_PASSWORD=$SFBX_GIT_PASSWORD
+          --target image
+          --tag ={DOCKER_TAG}
+          --target lint
+          ={DOCKER_OPTIONS}
+          .
+
+  docker-test:
+    doc: "Run tests in docker"
+    steps:
+    - $: >
+          docker build
+          --build-arg SFBX_GIT_REPOSITORY=$SFBX_GIT_REPOSITORY
+          --build-arg SFBX_GIT_USERNAME=$SFBX_GIT_USERNAME
+          --build-arg SFBX_GIT_PASSWORD=$SFBX_GIT_PASSWORD
+          --target image
+          --tag ={DOCKER_TAG}
+          --target test
+          ={DOCKER_OPTIONS}
+          .
+
+  docker-audit:
+    doc: "Audit dependencies in docker"
+    steps:
+    - $: >
+          docker build
+          --build-arg SFBX_GIT_REPOSITORY=$SFBX_GIT_REPOSITORY
+          --build-arg SFBX_GIT_USERNAME=$SFBX_GIT_USERNAME
+          --build-arg SFBX_GIT_PASSWORD=$SFBX_GIT_PASSWORD
+          --target image
+          --tag ={DOCKER_TAG}
+          --target audit
+          ={DOCKER_OPTIONS}
           .
 
   run:
