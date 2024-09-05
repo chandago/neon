@@ -4,7 +4,7 @@ doc: Build file for Go projects
 default: [lint, test]
 
 properties:
-  NAME: 'UNKNOWN'
+  NAME: '={filename(_BASE)}'
   VERSION: 'UNKNOWN'
   BUILD_DIR: 'build'
   PACKAGE: './...'
