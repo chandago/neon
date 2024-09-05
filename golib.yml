@@ -9,7 +9,7 @@ properties:
   TEST_OPTIONS: []
   TEST_PACKAGE: './...'
   COVER_PACKAGE: './...'
-  EXAMPLE: './integ/cmd/example/main.go'
+  EXAMPLE: 'integ/cmd/example/main.go'
 
 targets:
 
@@ -46,7 +46,7 @@ targets:
     doc: "Run example program"
     depends: start
     steps:
-    - $: [dotenv, go, run, integ/cmd/example/main.go]
+    - $: [dotenv, go, run, =EXAMPLE]
     - call: stop
 
   start:
