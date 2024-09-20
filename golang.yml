@@ -207,4 +207,4 @@ targets:
     - $: [git, tag, 'v={VERSION}']
     - $: [git, push, --tags]
     - $: [glab, auth, login, --token, '={env("GLAB_TOKEN")}', --hostname, =GITLAB_HOSTNAME]
-    - $: [glab, release, create, 'v={VERSION}', 'target/={NAME}-={VERSION}.zip']
+    - $: [glab, release, create, 'v={VERSION}', '={BUILD_DIR}/={NAME}-={VERSION}.zip']
