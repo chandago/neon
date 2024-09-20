@@ -17,6 +17,9 @@ properties:
   - github.com/intercloud/gobinsec@latest
   TEST_CASES: =PACKAGE
   TEST_OPTS: ['-cover']
+  BIN_DIR: '={BUILD_DIR}/bin'
+  #OS_ARCH: [darwin/amd64, darwin/arm64, linux/amd64, windows/amd64]
+  ARC_DIR: '={BUILD_DIR}/arc'
   RUN_ARGS: []
   DOCKER_TAG: '={NAME}:latest'
   DOCKER_OPTIONS: ''
@@ -76,19 +79,6 @@ targets:
     - print: "Generating binary in ={BUILD_DIR}/={NAME}"
     - $: ['go', 'build', '-o', '={BUILD_DIR}',
           '-ldflags', '-X ={VERSION_PATH}=={VERSION} -s -f',
-          =PACKAGE]
-
-  binaries:
-    doc: "Make binaries for all platforms"
-    steps:
-    - $:  'go tool dist list | grep -v android | grep -v dragonfly | grep -v plan9 | grep -v solaris'
-      1=: GOOSARCH
-      1x: true
-    - 'GOOSARCH = replace(GOOSARCH, "\n", " ")'
-    - mkdir: '={BUILD_DIR}/bin'
-    - $: ['gox', '-ldflags', '-X ={VERSION_PATH}=={VERSION} -s -f',
-          '-osarch="={GOOSARCH}"',
-          '-output=={BUILD_DIR}/bin/{{.Dir}}-{{.OS}}-{{.Arch}}',
           =PACKAGE]
 
   docker:
@@ -172,3 +162,54 @@ targets:
     steps:
     - $: ['={BUILD_DIR}/={NAME}']
       +: =RUN_ARGS
+
+  binaries:
+    doc: "Make binaries for all platforms"
+    steps:
+    - if: 'defined("OS_ARCH")'
+      then:
+      - 'os_arch = join(OS_ARCH, " ")'
+      else:
+      - $:  'go tool dist list | grep -v android | grep -v dragonfly | grep -v plan9 | grep -v solaris'
+        1=: os_arch
+        1x: true
+      - 'os_arch = replace(os_arch, "\n", " ")'
+    - mkdir: '={BUILD_DIR}/bin'
+    - print: 'Generating binaries for ={replace(os_arch, " ", ", ")}'
+    - $: ['gox',
+          '-ldflags', '-X ={VERSION_PATH}=={VERSION} -s -f',
+          '-osarch', '={os_arch}',
+          '-output', '={BIN_DIR}/{{.Dir}}-{{.OS}}-{{.Arch}}',
+          =PACKAGE]
+
+  archive:
+    depends: [binaries]
+    doc: "Generate archive with binaries"
+    steps:
+    - mkdir: =ARC_DIR
+    - copy: '*'
+      dir: =BIN_DIR
+      todir: =ARC_DIR
+    - copy: ['README*', 'LICENSE*']
+      dir: =_BASE
+      todir: =ARC_DIR
+    - zip: '*'
+      dir: =ARC_DIR
+      tofile: '={BUILD_DIR}/={NAME}.zip'
+
+  release:
+    depends: [clean, archive]
+    doc: "Release and deploy artifact on Gitlab (install glab with 'brew install glab')"
+    steps:
+    - if: 'defined("VERSION")'
+      then:
+      - version = VERSION
+      else:
+      - prompt: "Enter version number"
+        to: version
+    - move: '={BUILD_DIR}/={NAME}.zip'
+      tofile: '={BUILD_DIR}/={NAME}-={version}.zip'
+    - $: [git, tag, 'v={version}']
+    - $: [git, push, --tags]
+    - $: [glab, auth, login, --token, '={env("GLAB_TOKEN")}', --hostname, =GITLAB_HOSTNAME]
+    - $: [glab, release, create, 'v={version}', 'target/={NAME}-={version}.zip']
