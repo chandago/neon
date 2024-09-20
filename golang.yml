@@ -201,15 +201,9 @@ targets:
     depends: [clean, archive]
     doc: "Release and deploy artifact on Gitlab (install glab with 'brew install glab')"
     steps:
-    - if: 'defined("VERSION")'
-      then:
-      - version = VERSION
-      else:
-      - prompt: "Enter version number"
-        to: version
     - move: '={BUILD_DIR}/={NAME}.zip'
-      tofile: '={BUILD_DIR}/={NAME}-={version}.zip'
-    - $: [git, tag, 'v={version}']
+      tofile: '={BUILD_DIR}/={NAME}-={VERSION}.zip'
+    - $: [git, tag, 'v={VERSION}']
     - $: [git, push, --tags]
     - $: [glab, auth, login, --token, '={env("GLAB_TOKEN")}', --hostname, =GITLAB_HOSTNAME]
-    - $: [glab, release, create, 'v={version}', 'target/={NAME}-={version}.zip']
+    - $: [glab, release, create, 'v={VERSION}', 'target/={NAME}-={VERSION}.zip']
