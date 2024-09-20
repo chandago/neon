@@ -19,6 +19,7 @@ properties:
   TEST_OPTS: ['-cover']
   BIN_DIR: '={BUILD_DIR}/bin'
   #OS_ARCH: [darwin/amd64, darwin/arm64, linux/amd64, windows/amd64]
+  GITLAB_HOSTNAME: 'gitlab.datalf.chat'
   ARC_DIR: '={BUILD_DIR}/arc'
   RUN_ARGS: []
   DOCKER_TAG: '={NAME}:latest'
