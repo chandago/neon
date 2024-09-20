@@ -18,6 +18,7 @@ properties:
   TEST_CASES: =PACKAGE
   TEST_OPTS: ['-cover']
   BIN_DIR: '={BUILD_DIR}/bin'
+  BIN_FILES: '*'
   #OS_ARCH: [darwin/amd64, darwin/arm64, linux/amd64, windows/amd64]
   GITLAB_HOSTNAME: 'gitlab.datalf.chat'
   ARC_DIR: '={BUILD_DIR}/arc'
@@ -184,11 +185,11 @@ targets:
           =PACKAGE]
 
   archive:
-    depends: [binaries]
+    depends: [clean, binaries]
     doc: "Generate archive with binaries"
     steps:
     - mkdir: =ARC_DIR
-    - copy: '*'
+    - copy: =BIN_FILES
       dir: =BIN_DIR
       todir: =ARC_DIR
     - copy: ['README*', 'LICENSE*']
@@ -199,7 +200,7 @@ targets:
       tofile: '={BUILD_DIR}/={NAME}.zip'
 
   release:
-    depends: [clean, archive]
+    depends: [archive]
     doc: "Release and deploy artifact on Gitlab (install glab with 'brew install glab')"
     steps:
     - move: '={BUILD_DIR}/={NAME}.zip'
