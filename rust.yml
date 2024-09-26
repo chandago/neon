@@ -7,9 +7,10 @@ properties:
   NAME:       '={filename(_BASE)}'
   ARGS:       []
   TESTS:      []
+  BUILD_DIR:  'target'
   BIN_NAMES:  [=NAME]
-  BIN_DIR:    'target/binaries'
-  ARC_DIR:    'target/archive'
+  BIN_DIR:    '={BUILD_DIR}/binaries'
+  ARC_DIR:    '={BUILD_DIR}/archive'
   DOCKER_TAG: '={NAME}:latest'
   PLUGIN:     'c4s4/build'
   DIST_URL:   'https://sweetohm.net/dist'
@@ -170,9 +171,9 @@ targets:
       - for: bin_name
         in: =BIN_NAMES
         do:
-        - copy:  'target/={target}/release/={bin_name}'
+        - copy:  '={BUILD_DIR}/={target}/release/={bin_name}'
           tofile: '={BIN_DIR}/={bin_name}-={target_name}'
-        - copy:  'target/={target}/release/={bin_name}.exe'
+        - copy:  '={BUILD_DIR}/={target}/release/={bin_name}.exe'
           tofile: '={BIN_DIR}/={bin_name}-={target_name}.exe'
 
   archive:
@@ -188,7 +189,7 @@ targets:
       todir: =ARC_DIR
     - zip: '*'
       dir: =ARC_DIR
-      tofile: 'target/={NAME}.zip'
+      tofile: '={BUILD_DIR}/={NAME}.zip'
 
   release:
     depends: [clean, archive]
@@ -197,16 +198,16 @@ targets:
     - $: [toml, get, Cargo.toml, package.version, --raw]
       1=: version
       1x: true
-    - move: 'target/={NAME}.zip'
-      tofile: 'target/={NAME}-={version}.zip'
+    - move: '={BUILD_DIR}/={NAME}.zip'
+      tofile: '={BUILD_DIR}/={NAME}-={version}.zip'
     - if: '_OS == "linux"'
       then:
       - copy: '={NAME}-={version}.zip'
-        dir: 'target'
+        dir: =BUILD_DIR
         todir: '~/dsk/'
       else:
       - copy: '={NAME}-={version}.zip'
-        dir: 'target'
+        dir: =BUILD_DIR
         todir: '~/Desktop/'
     - copy: '={_REPO}/={PLUGIN}/install'
       todir: =BIN_DIR
