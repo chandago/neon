@@ -111,11 +111,20 @@ targets:
           tofile: '={BUILD_DIR}/={BIN_DIR}/={bin_name}-={target_name}.exe'
 
   version:
-    doc: "Get version from Cargo.toml"
+    doc: "Confirm version from Cargo.toml"
     steps:
     - $: [toml, get, Cargo.toml, package.version, --raw]
       1=: VERSION
       1x: true
+    - print: "You are about to release version ={VERSION}"
+    - prompt: "OK (y/n)?"
+      to: confirm
+      default: "y"
+      pattern: "^[YyNn]$"
+      error: "Please answer y or n"
+    - if: 'confirm != "y" && confirm != "Y"'
+      then:
+      - throw: "Release aborted"
 
   clean:
     doc: "Clean generated files"
