@@ -12,9 +12,6 @@ properties:
   BIN_DIR:    '={BUILD_DIR}/binaries'
   ARC_DIR:    '={BUILD_DIR}/archive'
   DOCKER_TAG: '={NAME}:latest'
-  PLUGIN:     'c4s4/build'
-  DIST_URL:   'https://sweetohm.net/dist'
-  WEB_HOME:   'casa@sweetohm.net:/web/app/dist/={NAME}'
   TARGETS:
     aarch64-unknown-linux-gnu: linux-arm64
     x86_64-unknown-linux-gnu: linux-amd64
@@ -209,13 +206,6 @@ targets:
       - copy: '={NAME}-={version}.zip'
         dir: =BUILD_DIR
         todir: '~/Desktop/'
-    - copy: '={_REPO}/={PLUGIN}/install'
-      todir: =BIN_DIR
-    - replace: '={BIN_DIR}/install'
-      with:
-        $NAME$: =NAME
-        $DIST_URL$: =DIST_URL
-    - $: 'scp ={BIN_DIR}/* ={WEB_HOME}'
     - $: [git, tag, =version]
     - $: [git, push, --tags]
 
