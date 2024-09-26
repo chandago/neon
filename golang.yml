@@ -2,6 +2,8 @@
 
 doc: Build file for Go projects
 default: [lint, test]
+extends:
+- chandago/neon/common.yml
 
 properties:
   NAME: '={filename(_BASE)}'
@@ -17,15 +19,8 @@ properties:
   - github.com/intercloud/gobinsec@latest
   TEST_CASES: =PACKAGE
   TEST_OPTS: ['-cover']
-  BIN_DIR: 'bin'
-  BIN_FILES: '*'
-  ARC_DIR: 'arc'
-  ARC_FILES:
-    =_BASE: ['README*', 'LICENSE*']
   GITLAB_HOSTNAME: 'gitlab.datalf.chat'
   RUN_ARGS: []
-  DOCKER_TAG: '={NAME}:latest'
-  DOCKER_OPTIONS: ''
   GOBINSEC_ENABLED: false
   #OS_ARCH: [darwin/amd64, darwin/arm64, linux/amd64, windows/amd64]
 
@@ -116,42 +111,6 @@ targets:
           '-output', '={BUILD_DIR}/={BIN_DIR}/{{.Dir}}-{{.OS}}-{{.Arch}}',
           =PACKAGE]
 
-  archive:
-    depends: [binaries]
-    doc: "Generate archive with binaries and documentation"
-    steps:
-    # generate archive
-    - mkdir: '={BUILD_DIR}/={ARC_DIR}/bin'
-    - copy: =BIN_FILES
-      dir: '={BUILD_DIR}/={BIN_DIR}'
-      todir: '={BUILD_DIR}/={ARC_DIR}/bin'
-    - for: dir
-      in: keys(ARC_FILES)
-      do:
-      - copy: =ARC_FILES[dir]
-        dir: =dir
-        todir: '={BUILD_DIR}/={ARC_DIR}'
-    - zip: '**/*'
-      dir: '={BUILD_DIR}/={ARC_DIR}'
-      tofile: '={BUILD_DIR}/={NAME}-={VERSION}.zip'
-      prefix: '={NAME}-={VERSION}'
-    # copy archive on desktop
-    - if: '_OS == "linux"'
-      then:
-      - copy: '={NAME}-={VERSION}.zip'
-        dir: =BUILD_DIR
-        todir: '~/dsk/'
-      else:
-      - copy: '={NAME}-={VERSION}.zip'
-        dir: =BUILD_DIR
-        todir: '~/Desktop/'
-
-  deploy:
-    doc: "Deploy binaries on Gitlab"
-    steps:
-    - $: [glab, auth, login, --token, '={env("GLAB_TOKEN")}', --hostname, =GITLAB_HOSTNAME]
-    - $: [glab, release, create, 'v={VERSION}', '={BUILD_DIR}/={NAME}-={VERSION}.zip']
-
   version:
     doc: "Prompt for release version"
     steps:
@@ -169,13 +128,6 @@ targets:
     - prompt: "Enter release version"
       to: VERSION
 
-  release:
-    depends: [version, lint, test, archive, deploy]
-    doc: "Perform a release"
-    steps:
-    - $: [git, tag, =VERSION]
-    - $: [git, push, --tags]
-
   clean:
     doc: "Clean build directory and Go test cache"
     steps:
@@ -183,50 +135,8 @@ targets:
     - $: ['go', 'clean', '-cache']
     - $: ['go', 'clean', '-testcache']
 
-################################# DOCKER STUFF #################################
-
-  docker:
-    doc: "Build Docker image"
-    steps:
-    - $: >
-        docker build
-        --build-arg GOPRIVATE=$GOPRIVATE
-        --build-arg SFBX_GIT_USERNAME=$SFBX_GIT_USERNAME
-        --build-arg SFBX_GIT_PASSWORD=$SFBX_GIT_PASSWORD
-        --tag ={DOCKER_TAG}
-        ={DOCKER_OPTIONS}
-        .
-
-  docker-all:
-    doc: "Lint, test, gobinsec and build in Docker image"
-    depends: [docker-lint, docker-test, docker-gobinsec, docker-build]
-
-  docker-lint:
-    doc: "Lint in Dockerfile"
-    steps:
-    - $: >
-        docker build
-        --build-arg GOPRIVATE=$GOPRIVATE
-        --build-arg SFBX_GIT_USERNAME=$SFBX_GIT_USERNAME
-        --build-arg SFBX_GIT_PASSWORD=$SFBX_GIT_PASSWORD
-        --target lint
-        ={DOCKER_OPTIONS}
-        .
-
-  docker-test:
-    doc: "Test in Dockerfile"
-    steps:
-    - $: >
-        docker build
-        --build-arg GOPRIVATE=$GOPRIVATE
-        --build-arg SFBX_GIT_USERNAME=$SFBX_GIT_USERNAME
-        --build-arg SFBX_GIT_PASSWORD=$SFBX_GIT_PASSWORD
-        --target test
-        ={DOCKER_OPTIONS}
-        .
-
   docker-gobinsec:
-    doc: "Run gobinsec in Dockerfile"
+    doc: "Run gobinsec in Docker"
     steps:
     - $: >
         docker build
@@ -238,17 +148,5 @@ targets:
         --build-arg MEMCACHIER_PASSWORD=$MEMCACHIER_PASSWORD
         --build-arg MEMCACHIER_EXPIRATION=$MEMCACHIER_EXPIRATION
         --target gobinsec
-        ={DOCKER_OPTIONS}
-        .
-
-  docker-build:
-    doc: "Build in Dockerfile"
-    steps:
-    - $: >
-        docker build
-        --build-arg GOPRIVATE=$GOPRIVATE
-        --build-arg SFBX_GIT_USERNAME=$SFBX_GIT_USERNAME
-        --build-arg SFBX_GIT_PASSWORD=$SFBX_GIT_PASSWORD
-        --target build
         ={DOCKER_OPTIONS}
         .

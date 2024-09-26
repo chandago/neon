@@ -2,6 +2,8 @@
 # Using tool toml installed with `cargo install toml-cli`
 
 default: [lint, fmt]
+extends:
+- chandago/neon/common.yml
 
 properties:
   NAME:       '={filename(_BASE)}'
@@ -93,7 +95,7 @@ targets:
     depends: env
     doc: "Build binaries for all targets"
     steps:
-    - mkdir: =BIN_DIR
+    - mkdir: '={BUILD_DIR}/={BIN_DIR}'
     - for: target
       in:  =keys(TARGETS)
       do:
@@ -104,45 +106,9 @@ targets:
         in: =BIN_NAMES
         do:
         - copy:  '={BUILD_DIR}/={target}/release/={bin_name}'
-          tofile: '={BIN_DIR}/={bin_name}-={target_name}'
+          tofile: '={BUILD_DIR}/={BIN_DIR}/={bin_name}-={target_name}'
         - copy:  '={BUILD_DIR}/={target}/release/={bin_name}.exe'
-          tofile: '={BIN_DIR}/={bin_name}-={target_name}.exe'
-
-  archive:
-    depends: [binaries]
-    doc: "Generate archive with binaries and documentation"
-    steps:
-    # generate archive
-    - mkdir: '={BUILD_DIR}/={ARC_DIR}/bin'
-    - copy: =BIN_FILES
-      dir: '={BUILD_DIR}/={BIN_DIR}'
-      todir: '={BUILD_DIR}/={ARC_DIR}/bin'
-    - for: dir
-      in: keys(ARC_FILES)
-      do:
-      - copy: =ARC_FILES[dir]
-        dir: =dir
-        todir: '={BUILD_DIR}/={ARC_DIR}'
-    - zip: '**/*'
-      dir: '={BUILD_DIR}/={ARC_DIR}'
-      tofile: '={BUILD_DIR}/={NAME}-={VERSION}.zip'
-      prefix: '={NAME}-={VERSION}'
-    # copy archive on desktop
-    - if: '_OS == "linux"'
-      then:
-      - copy: '={NAME}-={VERSION}.zip'
-        dir: =BUILD_DIR
-        todir: '~/dsk/'
-      else:
-      - copy: '={NAME}-={VERSION}.zip'
-        dir: =BUILD_DIR
-        todir: '~/Desktop/'
-
-  deploy:
-    doc: "Deploy binaries on Gitlab"
-    steps:
-    - $: [glab, auth, login, --token, '={env("GLAB_TOKEN")}', --hostname, =GITLAB_HOSTNAME]
-    - $: [glab, release, create, 'v={VERSION}', '={BUILD_DIR}/={NAME}-={VERSION}.zip']
+          tofile: '={BUILD_DIR}/={BIN_DIR}/={bin_name}-={target_name}.exe'
 
   version:
     doc: "Get version from Cargo.toml"
@@ -151,60 +117,10 @@ targets:
       1=: VERSION
       1x: true
 
-  release:
-    depends: [version, clean, lint, test, archive, deploy]
-    doc: "Perform a release"
-    steps:
-    - $: [git, tag, =VERSION]
-    - $: [git, push, --tags]
-
   clean:
     doc: "Clean generated files"
     steps:
     - $: [cargo, clean]
-
-  ################################ DOCKER STUFF ################################
-
-  docker:
-    doc: "Build docker image"
-    steps:
-    - $: >
-          docker build
-          --build-arg SFBX_GIT_REPOSITORY=$SFBX_GIT_REPOSITORY
-          --build-arg SFBX_GIT_USERNAME=$SFBX_GIT_USERNAME
-          --build-arg SFBX_GIT_PASSWORD=$SFBX_GIT_PASSWORD
-          --target image
-          --tag ={DOCKER_TAG}
-          ={DOCKER_OPTIONS}
-          .
-
-  docker-lint:
-    doc: "Lint code in docker"
-    steps:
-    - $: >
-          docker build
-          --build-arg SFBX_GIT_REPOSITORY=$SFBX_GIT_REPOSITORY
-          --build-arg SFBX_GIT_USERNAME=$SFBX_GIT_USERNAME
-          --build-arg SFBX_GIT_PASSWORD=$SFBX_GIT_PASSWORD
-          --target image
-          --tag ={DOCKER_TAG}
-          --target lint
-          ={DOCKER_OPTIONS}
-          .
-
-  docker-test:
-    doc: "Run tests in docker"
-    steps:
-    - $: >
-          docker build
-          --build-arg SFBX_GIT_REPOSITORY=$SFBX_GIT_REPOSITORY
-          --build-arg SFBX_GIT_USERNAME=$SFBX_GIT_USERNAME
-          --build-arg SFBX_GIT_PASSWORD=$SFBX_GIT_PASSWORD
-          --target image
-          --tag ={DOCKER_TAG}
-          --target test
-          ={DOCKER_OPTIONS}
-          .
 
   docker-audit:
     doc: "Audit dependencies in docker"
@@ -214,22 +130,6 @@ targets:
           --build-arg SFBX_GIT_REPOSITORY=$SFBX_GIT_REPOSITORY
           --build-arg SFBX_GIT_USERNAME=$SFBX_GIT_USERNAME
           --build-arg SFBX_GIT_PASSWORD=$SFBX_GIT_PASSWORD
-          --target image
-          --tag ={DOCKER_TAG}
           --target audit
-          ={DOCKER_OPTIONS}
-          .
-
-  docker-build:
-    doc: "Build in docker"
-    steps:
-    - $: >
-          docker build
-          --build-arg SFBX_GIT_REPOSITORY=$SFBX_GIT_REPOSITORY
-          --build-arg SFBX_GIT_USERNAME=$SFBX_GIT_USERNAME
-          --build-arg SFBX_GIT_PASSWORD=$SFBX_GIT_PASSWORD
-          --target image
-          --tag ={DOCKER_TAG}
-          --target build
           ={DOCKER_OPTIONS}
           .

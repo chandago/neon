@@ -1,0 +1,31 @@
+# NeON Build File (http://github.com/c4s4/neon)
+#
+# Backend project directory must have been linked into project directory
+
+properties:
+  BACKEND_BUILD: 'backend/build.yml'
+
+targets:
+
+  start:
+    doc: "Start backend"
+    depends: [stop]
+    steps:
+    - neon: =BACKEND_BUILD
+      targets: [start]
+
+  stop:
+    doc: "Stop backend"
+    steps:
+    - neon: =BACKEND_BUILD
+      targets: [stop]
+
+  logs:
+    doc: "Show logs"
+    steps:
+    - $: [docker, compose, logs]
+
+  tail:
+    doc: "Show new logs"
+    steps:
+    - $: [docker, compose, logs, -f]
