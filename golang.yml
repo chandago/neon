@@ -17,15 +17,17 @@ properties:
   - github.com/intercloud/gobinsec@latest
   TEST_CASES: =PACKAGE
   TEST_OPTS: ['-cover']
-  BIN_DIR: '={BUILD_DIR}/bin'
+  BIN_DIR: 'bin'
   BIN_FILES: '*'
-  #OS_ARCH: [darwin/amd64, darwin/arm64, linux/amd64, windows/amd64]
+  ARC_DIR: 'arc'
+  ARC_FILES:
+    =_BASE: ['README*', 'LICENSE*']
   GITLAB_HOSTNAME: 'gitlab.datalf.chat'
-  ARC_DIR: '={BUILD_DIR}/arc'
   RUN_ARGS: []
   DOCKER_TAG: '={NAME}:latest'
   DOCKER_OPTIONS: ''
   GOBINSEC_ENABLED: false
+  #OS_ARCH: [darwin/amd64, darwin/arm64, linux/amd64, windows/amd64]
 
 targets:
 
@@ -67,12 +69,10 @@ targets:
       else:
       - print: "Gobinsec check disabled"
 
-  clean:
-    doc: "Clean build directory and Go test cache"
+  update:
+    doc: "Update Go dependencies"
     steps:
-    - delete: =BUILD_DIR
-    - $: ['go', 'clean', '-cache']
-    - $: ['go', 'clean', '-testcache']
+    - $: ['go', 'get', '-u', =PACKAGE]
 
   build:
     doc: "Build binary for current platform"
@@ -82,6 +82,108 @@ targets:
     - $: ['go', 'build', '-o', '={BUILD_DIR}',
           '-ldflags', '-X ={VERSION_PATH}=={VERSION} -s -f',
           =PACKAGE]
+
+  install:
+    doc: "Build and install binary in GOPATH"
+    steps:
+    - 'path = joinpath(split(env("GOPATH"), ":")[0], "bin")'
+    - print: 'Building and installing binary in ={path}'
+    - $: ['go', 'build', '-o', =path, '-ldflags', '-s -f', =PACKAGE]
+
+  run:
+    doc: Run Go tool
+    depends: build
+    steps:
+    - $: ['={BUILD_DIR}/={NAME}']
+      +: =RUN_ARGS
+
+  binaries:
+    doc: "Make binaries for all platforms"
+    steps:
+    - if: 'defined("OS_ARCH")'
+      then:
+      - 'os_arch = join(OS_ARCH, " ")'
+      else:
+      - $:  'go tool dist list | grep -v android | grep -v dragonfly | grep -v plan9 | grep -v solaris'
+        1=: os_arch
+        1x: true
+      - 'os_arch = replace(os_arch, "\n", " ")'
+    - mkdir: '={BUILD_DIR}/bin'
+    - print: 'Generating binaries for ={replace(os_arch, " ", ", ")}'
+    - $: ['gox',
+          '-ldflags', '-X ={VERSION_PATH}=={VERSION} -s -f',
+          '-osarch', '={os_arch}',
+          '-output', '={BUILD_DIR}/={BIN_DIR}/{{.Dir}}-{{.OS}}-{{.Arch}}',
+          =PACKAGE]
+
+  archive:
+    depends: [binaries]
+    doc: "Generate archive with binaries and documentation"
+    steps:
+    # generate archive
+    - mkdir: '={BUILD_DIR}/={ARC_DIR}/bin'
+    - copy: =BIN_FILES
+      dir: '={BUILD_DIR}/={BIN_DIR}'
+      todir: '={BUILD_DIR}/={ARC_DIR}/bin'
+    - for: dir
+      in: keys(ARC_FILES)
+      do:
+      - copy: =ARC_FILES[dir]
+        dir: =dir
+        todir: '={BUILD_DIR}/={ARC_DIR}'
+    - zip: '**/*'
+      dir: '={BUILD_DIR}/={ARC_DIR}'
+      tofile: '={BUILD_DIR}/={NAME}-={VERSION}.zip'
+      prefix: '={NAME}-={VERSION}'
+    # copy archive on desktop
+    - if: '_OS == "linux"'
+      then:
+      - copy: '={NAME}-={VERSION}.zip'
+        dir: =BUILD_DIR
+        todir: '~/dsk/'
+      else:
+      - copy: '={NAME}-={VERSION}.zip'
+        dir: =BUILD_DIR
+        todir: '~/Desktop/'
+
+  deploy:
+    doc: "Deploy binaries on Gitlab"
+    steps:
+    - $: [glab, auth, login, --token, '={env("GLAB_TOKEN")}', --hostname, =GITLAB_HOSTNAME]
+    - $: [glab, release, create, 'v={VERSION}', '={BUILD_DIR}/={NAME}-={VERSION}.zip']
+
+  version:
+    doc: "Prompt for release version"
+    steps:
+    - $: ['git', 'tag']
+      1=: tags
+      1x: true
+    - |
+      tags = split(tags, "\n")
+      sortversions(tags)
+      if len(tags) > 10 {
+        tags = tags[len(tags)-10:]
+      }
+      tags = join(tags, ", ")
+    - print: "Last tags: ={tags}"
+    - prompt: "Enter release version"
+      to: VERSION
+
+  release:
+    depends: [version, lint, test, archive, deploy]
+    doc: "Perform a release"
+    steps:
+    - $: [git, tag, =VERSION]
+    - $: [git, push, --tags]
+
+  clean:
+    doc: "Clean build directory and Go test cache"
+    steps:
+    - delete: =BUILD_DIR
+    - $: ['go', 'clean', '-cache']
+    - $: ['go', 'clean', '-testcache']
+
+################################# DOCKER STUFF #################################
 
   docker:
     doc: "Build Docker image"
@@ -150,62 +252,3 @@ targets:
         --target build
         ={DOCKER_OPTIONS}
         .
-
-  install:
-    doc: "Build and install binary in GOPATH"
-    steps:
-    - 'path = joinpath(split(env("GOPATH"), ":")[0], "bin")'
-    - print: 'Building and installing binary in ={path}'
-    - $: ['go', 'build', '-o', =path, '-ldflags', '-s -f', =PACKAGE]
-
-  run:
-    doc: Run Go tool
-    depends: build
-    steps:
-    - $: ['={BUILD_DIR}/={NAME}']
-      +: =RUN_ARGS
-
-  binaries:
-    doc: "Make binaries for all platforms"
-    steps:
-    - if: 'defined("OS_ARCH")'
-      then:
-      - 'os_arch = join(OS_ARCH, " ")'
-      else:
-      - $:  'go tool dist list | grep -v android | grep -v dragonfly | grep -v plan9 | grep -v solaris'
-        1=: os_arch
-        1x: true
-      - 'os_arch = replace(os_arch, "\n", " ")'
-    - mkdir: '={BUILD_DIR}/bin'
-    - print: 'Generating binaries for ={replace(os_arch, " ", ", ")}'
-    - $: ['gox',
-          '-ldflags', '-X ={VERSION_PATH}=={VERSION} -s -f',
-          '-osarch', '={os_arch}',
-          '-output', '={BIN_DIR}/{{.Dir}}-{{.OS}}-{{.Arch}}',
-          =PACKAGE]
-
-  archive:
-    depends: [clean, binaries]
-    doc: "Generate archive with binaries"
-    steps:
-    - mkdir: =ARC_DIR
-    - copy: =BIN_FILES
-      dir: =BIN_DIR
-      todir: =ARC_DIR
-    - copy: ['README*', 'LICENSE*']
-      dir: =_BASE
-      todir: =ARC_DIR
-    - zip: '*'
-      dir: =ARC_DIR
-      tofile: '={BUILD_DIR}/={NAME}.zip'
-
-  release:
-    depends: [archive]
-    doc: "Release and deploy artifact on Gitlab (install glab with 'brew install glab')"
-    steps:
-    - move: '={BUILD_DIR}/={NAME}.zip'
-      tofile: '={BUILD_DIR}/={NAME}-={VERSION}.zip'
-    - $: [git, tag, 'v={VERSION}']
-    - $: [git, push, --tags]
-    - $: [glab, auth, login, --token, '={env("GLAB_TOKEN")}', --hostname, =GITLAB_HOSTNAME]
-    - $: [glab, release, create, 'v={VERSION}', '={BUILD_DIR}/={NAME}-={VERSION}.zip']
