@@ -163,7 +163,7 @@ targets:
     steps:
     - $: [cargo, clean]
 
-  ##################### DOCKER STUFF ############################
+  ################################ DOCKER STUFF ################################
 
   docker:
     doc: "Build docker image"
