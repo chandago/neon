@@ -7,6 +7,12 @@ properties:
 
 targets:
 
+  backend:
+    doc: "Run backend integration test"
+    steps:
+    - neon: =BACKEND_BUILD
+      targets: all
+
   start:
     doc: "Start backend"
     depends: [stop]
