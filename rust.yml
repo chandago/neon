@@ -7,10 +7,10 @@ extends:
 
 properties:
   NAME:       '={filename(_BASE)}'
-  VERSION:    'UNKNOWN'
+  VERSION:    'draft'
+  BUILD_DIR:  'target'
   ARGS:       []
   TESTS:      []
-  BUILD_DIR:  'target'
   BIN_NAMES:  [=NAME]
   BIN_DIR:    'binaries'
   BIN_FILES:  '*'
@@ -18,35 +18,27 @@ properties:
   ARC_FILES:
     =_BASE: ['README*', 'LICENSE*']
   DOCKER_TAG: '={NAME}:latest'
+  DOCKER_OPTIONS: ''
   TARGETS:
     aarch64-unknown-linux-gnu: linux-arm64
     x86_64-unknown-linux-gnu: linux-amd64
     aarch64-apple-darwin: darwin-arm64
     x86_64-apple-darwin: darwin-amd64
     x86_64-pc-windows-gnu: windows-amd64
-  DOCKER_OPTIONS: ''
 
 targets:
-
-  env:
-    doc: "Set environment variables"
-    steps:
-    - if: '_OS == "darwin" && _ARCH == "arm64"'
-      then:
-      - setenv: 'CROSS_CONTAINER_OPTS'
-        value:  '--platform linux/amd64'
-
-  lint:
-    depends: env
-    doc: "Lint Rust code"
-    steps:
-    - $: [cargo, check]
 
   fmt:
     depends: env
     doc: "Format Rust code"
     steps:
     - $: [cargo, fmt]
+
+  lint:
+    depends: env
+    doc: "Lint Rust code"
+    steps:
+    - $: [cargo, check]
 
   test:
     doc: "Run Rust tests"
@@ -131,14 +123,10 @@ targets:
     steps:
     - $: [cargo, clean]
 
-  docker-audit:
-    doc: "Audit dependencies in docker"
+  env:
+    doc: "Set environment variables"
     steps:
-    - $: >
-          docker build
-          --build-arg SFBX_GIT_REPOSITORY=$SFBX_GIT_REPOSITORY
-          --build-arg SFBX_GIT_USERNAME=$SFBX_GIT_USERNAME
-          --build-arg SFBX_GIT_PASSWORD=$SFBX_GIT_PASSWORD
-          --target audit
-          ={DOCKER_OPTIONS}
-          .
+    - if: '_OS == "darwin" && _ARCH == "arm64"'
+      then:
+      - setenv: 'CROSS_CONTAINER_OPTS'
+        value:  '--platform linux/amd64'

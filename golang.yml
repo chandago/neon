@@ -7,40 +7,24 @@ extends:
 
 properties:
   NAME: '={filename(_BASE)}'
-  VERSION: 'UNKNOWN'
+  VERSION: 'draft'
   BUILD_DIR: 'build'
   PACKAGE: './...'
   PACKAGE_DIR: '.'
   VERSION_PATH: 'main.Version'
   LINT_TIMEOUT: 5m
+  TEST_CASES: =PACKAGE
+  TEST_OPTS: ['-cover']
+  RUN_ARGS: []
+  GITLAB_HOSTNAME: 'gitlab.datalf.chat'
+  AUDIT_ENABLED: false
   GOTOOLS:
   - github.com/mitchellh/gox@latest
   - github.com/golangci/golangci-lint/cmd/golangci-lint@latest
   - github.com/intercloud/gobinsec@latest
-  TEST_CASES: =PACKAGE
-  TEST_OPTS: ['-cover']
-  GITLAB_HOSTNAME: 'gitlab.datalf.chat'
-  RUN_ARGS: []
-  GOBINSEC_ENABLED: false
   #OS_ARCH: [darwin/amd64, darwin/arm64, linux/amd64, windows/amd64]
 
 targets:
-
-  tools:
-    doc: "Install tools"
-    steps:
-    - 'gotools = env("GOTOOLS"); if gotools == "" { gotools = env("GOPATH") }'
-    - for: tool
-      in:  GOTOOLS
-      do:
-      - print: "Getting tool ={tool}"
-      - $: 'GOPATH=={gotools} go install ={tool}'
-
-  lint:
-    doc: "Lint code with golangci-lint"
-    steps:
-    - print: "Linting Go code"
-    - $: ['golangci-lint', 'run', '--timeout', =LINT_TIMEOUT, =PACKAGE]
 
   fmt:
     doc: "Format Go code"
@@ -48,17 +32,23 @@ targets:
     - print: "Formatting Go source files"
     - $: ['gofmt', '-s', '-w', =PACKAGE_DIR]
 
+  lint:
+    doc: "Lint code with golangci-lint"
+    steps:
+    - print: "Linting Go code"
+    - $: ['golangci-lint', 'run', '--timeout', =LINT_TIMEOUT, =PACKAGE]
+
   test:
     doc: "Run Go tests"
     steps:
     - $: ['go', 'test']
       +: =TEST_OPTS+TEST_CASES
 
-  gobinsec:
-    doc: "Check binary for vulnerabilities"
+  audit:
+    doc: "Audit dependencies with gobinsec"
     depends: build
     steps:
-    - if: GOBINSEC_ENABLED
+    - if: AUDIT_ENABLED
       then:
       - $: 'gobinsec -config .gobinsec.yml -wait $(find ={BUILD_DIR}/* -perm -u+x)'
       else:
@@ -135,18 +125,12 @@ targets:
     - $: ['go', 'clean', '-cache']
     - $: ['go', 'clean', '-testcache']
 
-  docker-gobinsec:
-    doc: "Run gobinsec in Docker"
+  tools:
+    doc: "Install tools"
     steps:
-    - $: >
-        docker build
-        --build-arg GOPRIVATE=$GOPRIVATE
-        --build-arg SFBX_GIT_USERNAME=$SFBX_GIT_USERNAME
-        --build-arg SFBX_GIT_PASSWORD=$SFBX_GIT_PASSWORD
-        --build-arg MEMCACHIER_ADDRESS=$MEMCACHIER_ADDRESS
-        --build-arg MEMCACHIER_USERNAME=$MEMCACHIER_USERNAME
-        --build-arg MEMCACHIER_PASSWORD=$MEMCACHIER_PASSWORD
-        --build-arg MEMCACHIER_EXPIRATION=$MEMCACHIER_EXPIRATION
-        --target gobinsec
-        ={DOCKER_OPTIONS}
-        .
+    - 'gotools = env("GOTOOLS"); if gotools == "" { gotools = env("GOPATH") }'
+    - for: tool
+      in:  GOTOOLS
+      do:
+      - print: "Getting tool ={tool}"
+      - $: 'GOPATH=={gotools} go install ={tool}'
