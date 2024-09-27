@@ -1,7 +1,7 @@
 # Build Rust project
 # Using tool toml installed with `cargo install toml-cli`
 
-default: [lint, fmt]
+default: [fmt, lint, test]
 extends:
 - chandago/neon/common.yml
 
