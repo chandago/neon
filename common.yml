@@ -25,13 +25,15 @@ targets:
   doc:
     doc: "Build PDF documentation"
     steps:
-    - mkdir: =DOC_DIR
-    - copy: README.md
-      todir: =DOC_DIR
-    - replace: '={DOC_DIR}/README.md'
-      with:
-        '[[_TOC_]]': ''
-    - $: [md2pdf, -o, '={DOC_DIR}/README.pdf', '={DOC_DIR}/README.md']
+    - if: 'exists("README.md")'
+      then:
+      - mkdir: =DOC_DIR
+      - copy: README.md
+        todir: =DOC_DIR
+      - replace: '={DOC_DIR}/README.md'
+        with:
+          '[[_TOC_]]': ''
+      - $: [md2pdf, -o, '={DOC_DIR}/README.pdf', '={DOC_DIR}/README.md']
 
   archive:
     depends: [binaries, doc]
