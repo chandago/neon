@@ -7,7 +7,7 @@ extends:
 
 properties:
   NAME: '={filename(_BASE)}'
-  VERSION: '={run("git", "rev-parse", "HEAD")[0:8]}'
+  VERSION: =try {run("git", "rev-parse", "HEAD")[0:8]} catch {"draft"}
   BUILD_DIR: 'build'
   PACKAGE: './...'
   PACKAGE_DIR: '.'
