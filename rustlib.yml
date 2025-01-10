@@ -53,3 +53,10 @@ targets:
       - $: [dotenv, target/release/example]
       finally:
       - call: stop
+
+  release:
+    depends: [branch, version, clean, lint, test]
+    doc: "Perform a release"
+    steps:
+    - $: [git, tag, =VERSION]
+    - $: [git, push, --tags]
