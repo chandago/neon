@@ -53,7 +53,7 @@ targets:
     steps:
     - if: AUDIT_ENABLED
       then:
-      - $: 'gobinsec -config .gobinsec.yml ={AUDIT_OPTIONS} $(find ={BUILD_DIR}/* -perm -u+x)'
+      - $: 'gobinsec -config .gobinsec.yml ={AUDIT_OPTIONS} $(find ={BUILD_DIR}/* -type f -perm -u+x)'
       else:
       - print: "Gobinsec check disabled"
 
