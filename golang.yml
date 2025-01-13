@@ -19,7 +19,8 @@ properties:
   ARC_FILES:
     =DOC_DIR: ['README.pdf']
     '={BUILD_DIR}': ['={BIN_DIR}/*']
-  AUDIT_ENABLED: false
+  AUDIT_ENABLED: true
+  AUDIT_OPTIONS: '-wait'
   GOTOOLS:
   - github.com/mitchellh/gox@latest
   - github.com/golangci/golangci-lint/cmd/golangci-lint@latest
@@ -52,7 +53,7 @@ targets:
     steps:
     - if: AUDIT_ENABLED
       then:
-      - $: 'gobinsec -config .gobinsec.yml -wait $(find ={BUILD_DIR}/* -perm -u+x)'
+      - $: 'gobinsec -config .gobinsec.yml ={AUDIT_OPTIONS} $(find ={BUILD_DIR}/* -perm -u+x)'
       else:
       - print: "Gobinsec check disabled"
 
