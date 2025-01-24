@@ -38,3 +38,13 @@ targets:
     doc: "Stop tool"
     steps:
     - $: [docker, compose, down]
+
+  logs:
+    doc: "Print logs"
+    steps:
+    - $: [docker, compose, logs]
+
+  tail:
+    doc: "Print new logs"
+    steps:
+    - $: [docker, compose, logs, -f]

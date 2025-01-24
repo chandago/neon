@@ -10,7 +10,7 @@ targets:
     doc: "Build Docker image"
     steps:
     - $: >
-        docker build
+        echo docker build
         --build-arg GOPRIVATE=$GOPRIVATE
         --build-arg SFBX_GIT_REPOSITORY=$SFBX_GIT_REPOSITORY
         --build-arg SFBX_GIT_USERNAME=$SFBX_GIT_USERNAME
