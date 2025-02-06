@@ -10,7 +10,7 @@ targets:
     doc: "Build Docker image"
     steps:
     - $: >
-        echo docker build
+        docker build
         --build-arg GOPRIVATE=$GOPRIVATE
         --build-arg SFBX_GIT_REPOSITORY=$SFBX_GIT_REPOSITORY
         --build-arg SFBX_GIT_USERNAME=$SFBX_GIT_USERNAME
@@ -63,11 +63,11 @@ targets:
     doc: "Audit dependencies in docker"
     steps:
     - $: >
-          docker build
-          --build-arg GOPRIVATE=$GOPRIVATE
-          --build-arg SFBX_GIT_REPOSITORY=$SFBX_GIT_REPOSITORY
-          --build-arg SFBX_GIT_USERNAME=$SFBX_GIT_USERNAME
-          --build-arg SFBX_GIT_PASSWORD=$SFBX_GIT_PASSWORD
-          --target audit
-          ={DOCKER_OPTIONS}
-          .
+        docker build
+        --build-arg GOPRIVATE=$GOPRIVATE
+        --build-arg SFBX_GIT_REPOSITORY=$SFBX_GIT_REPOSITORY
+        --build-arg SFBX_GIT_USERNAME=$SFBX_GIT_USERNAME
+        --build-arg SFBX_GIT_PASSWORD=$SFBX_GIT_PASSWORD
+        --target audit
+        ={DOCKER_OPTIONS}
+        .
