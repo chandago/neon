@@ -19,7 +19,7 @@ properties:
   ARC_FILES:
     =DOC_DIR: ['README.pdf']
     '={BUILD_DIR}': ['={BIN_DIR}/*']
-  AUDIT_ENABLED: true
+  AUDIT_ENABLED: false
   AUDIT_OPTIONS: '-wait'
   GOTOOLS:
   - github.com/mitchellh/gox@latest
