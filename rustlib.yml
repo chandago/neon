@@ -53,8 +53,7 @@ targets:
     steps:
     - call: start
     - try:
-      - print: "Running example..."
-      - $: [dotenv, target/release/example]
+      - call: ex
       finally:
       - call: stop
 
