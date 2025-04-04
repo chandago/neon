@@ -16,14 +16,19 @@ properties:
 targets:
 
   test:
-    doc: "Run unit tests"
+    doc: "Start, run unit tests and stop"
     steps:
     - call: start
     - try:
-      - $: [dotenv, --, go, test]
-        +: =BUILD_OPTIONS+TEST_OPTIONS+TEST_PACKAGE
+      - call: tst
       finally:
       - call: stop
+
+  tst:
+    doc: "Run unit tests"
+    steps:
+    - $: [dotenv, --, go, test]
+      +: =BUILD_OPTIONS+TEST_OPTIONS+TEST_PACKAGE
 
   integ:
     doc: "Start, run integration tests and stop"
