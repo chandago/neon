@@ -19,10 +19,8 @@ targets:
     doc: "Start, run unit tests and stop"
     steps:
     - call: start
-    - try:
-      - call: tst
-      finally:
-      - call: stop
+    - call: tst
+    - call: stop
 
   tst:
     doc: "Run unit tests"
@@ -34,10 +32,8 @@ targets:
     doc: "Start, run integration tests and stop"
     steps:
     - call: start
-    - try:
-      - call: itg
-      finally:
-      - call: stop
+    - call: itg
+    - call: stop
 
   itg:
     doc: "Run integration tests"
@@ -50,10 +46,8 @@ targets:
     doc: "Start, run integration tests with coverage report and stop"
     steps:
     - call: start
-    - try:
-      - call: itg-cover
-      finally:
-      - call: stop
+    - call: itg-cover
+    - call: stop
 
   itg-cover:
     doc: "Run integration tests with coverage report"
@@ -69,10 +63,8 @@ targets:
     doc: "Start, run example program and stop"
     steps:
     - call: start
-    - try:
-      - call: ex
-      finally:
-      - call: stop
+    - call: ex
+    - call: stop
 
   ex:
     doc: "Run example program"
