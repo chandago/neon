@@ -12,6 +12,7 @@ properties:
   TEST_PACKAGE: './...'
   COVER_PACKAGE: './...'
   EXAMPLE: 'integ/cmd/example/main.go'
+  STOP_SERVICES_ON_ERROR: true
 
 targets:
 
@@ -19,8 +20,14 @@ targets:
     doc: "Start, run unit tests and stop"
     steps:
     - call: start
-    - call: tst
-    - call: stop
+    - try:
+      - call: tst
+      - call: stop
+      catch:
+      - if: =STOP_SERVICES_ON_ERROR
+        then:
+        - call: stop
+      - throw: "Unit tests failed"
 
   tst:
     doc: "Run unit tests"
@@ -32,8 +39,14 @@ targets:
     doc: "Start, run integration tests and stop"
     steps:
     - call: start
-    - call: itg
-    - call: stop
+    - try:
+      - call: itg
+      - call: stop
+      catch:
+      - if: =STOP_SERVICES_ON_ERROR
+        then:
+        - call: stop
+      - throw: "Integration tests failed"
 
   itg:
     doc: "Run integration tests"
@@ -46,8 +59,14 @@ targets:
     doc: "Start, run integration tests with coverage report and stop"
     steps:
     - call: start
-    - call: itg-cover
-    - call: stop
+    - try:
+      - call: itg-cover
+      - call: stop
+      catch:
+      - if: =STOP_SERVICES_ON_ERROR
+        then:
+        - call: stop
+      - throw: "Integration tests with coverage report failed"
 
   itg-cover:
     doc: "Run integration tests with coverage report"
@@ -63,8 +82,14 @@ targets:
     doc: "Start, run example program and stop"
     steps:
     - call: start
-    - call: ex
-    - call: stop
+    - try:
+      - call: ex
+      - call: stop
+      catch:
+      - if: =STOP_SERVICES_ON_ERROR
+        then:
+        - call: stop
+      - throw: "Example program failed"
 
   ex:
     doc: "Run example program"
