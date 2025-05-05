@@ -4,6 +4,7 @@
 
 properties:
   BACKEND_BUILD: 'backend/build.yml'
+  CHAINSAW: true
 
 targets:
 
@@ -19,6 +20,8 @@ targets:
     steps:
     - neon: =BACKEND_BUILD
       targets: [start]
+      properties:
+        CHAINSAW: =CHAINSAW
 
   stop:
     doc: "Stop backend"
