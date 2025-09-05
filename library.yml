@@ -18,6 +18,7 @@ targets:
     steps:
     - try:
       - $: [docker, network, create, =NAME]
+        3x: true
     - $: [docker, compose, create, =NAME]
     - $: [docker, compose, start, =NAME]
     - 'stop = false'
