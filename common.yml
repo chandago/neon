@@ -89,11 +89,8 @@ targets:
     depends: [branch, version, clean, lint, test, archive, deploy]
     doc: "Perform a release"
     steps:
-    - if: 'exists("go.mod")'
+    - if: '!exists("go.mod")'
       then:
-      # GO tag vX.Y.Z
-      - $: [git, tag, 'v={VERSION}']
-      else:
-      # others tag X.Y.Z
+      # not a GO project tag X.Y.Z
       - $: [git, tag, =VERSION]
     - $: [git, push, --tags]
