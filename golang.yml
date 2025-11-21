@@ -21,6 +21,7 @@ properties:
     '={BUILD_DIR}': ['={BIN_DIR}/*']
   AUDIT_ENABLED: false
   AUDIT_OPTIONS: '-wait'
+  CLEAN_DS_STORE: true
   GOTOOLS:
   - github.com/mitchellh/gox@latest
   - github.com/golangci/golangci-lint/cmd/golangci-lint@latest
@@ -110,6 +111,9 @@ targets:
     - delete: =BUILD_DIR
     - $: ['go', 'clean', '-cache']
     - $: ['go', 'clean', '-testcache']
+    - if: =CLEAN_DS_STORE
+      then:
+      - delete: '**/.DS_Store'
 
   tools:
     doc: "Install tools"
