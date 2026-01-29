@@ -38,6 +38,7 @@ targets:
       then:
       - $: [dotenv, cargo, test, --, --, --test-threads=1, --ignored]
         +: =TESTS
+
   integ:
     doc: "Start, run integration tests and stop"
     steps:

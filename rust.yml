@@ -9,6 +9,7 @@ properties:
   NAME:         '={filename(_BASE)}'
   VERSION:      'draft'
   BUILD_DIR:    'target'
+  BINARY_DIR:   '={BUILD_DIR}/release'
   ARGS:         []
   TESTS:        []
   TEST_IGNORED: false
