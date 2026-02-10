@@ -19,8 +19,8 @@ properties:
   ARC_FILES:
     =DOC_DIR: ['README.pdf']
     '={BUILD_DIR}': ['={BIN_DIR}/*']
-  AUDIT_ENABLED: false
-  AUDIT_OPTIONS: '-wait'
+  AUDIT_ENABLED: true
+  AUDIT_OPTIONS: ['-wait']
   CLEAN_DS_STORE: true
   GOTOOLS:
   - github.com/mitchellh/gox@latest
@@ -50,11 +50,13 @@ targets:
 
   audit:
     doc: "Audit dependencies with gobinsec"
-    depends: build
+    depends: [clean, build]
     steps:
     - if: AUDIT_ENABLED
       then:
-      - $: 'gobinsec -config .gobinsec.yml ={AUDIT_OPTIONS} $(find ={BUILD_DIR}/* -type f -perm -u+x)'
+      - 'options = AUDIT_OPTIONS + find(".", joinpath(BUILD_DIR, "*"))'
+      - $: [gobinsec, -config, .gobinsec.yml]
+        +: =options
       else:
       - print: "Gobinsec check disabled"
 
