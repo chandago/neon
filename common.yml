@@ -66,7 +66,7 @@ targets:
     doc: "Deploy binaries on Gitlab"
     steps:
     - $: [glab, auth, login, --token, '={env("GLAB_TOKEN")}', --hostname, =GITLAB_HOSTNAME]
-    - $: [glab, release, create, 'v={VERSION}', '={BUILD_DIR}/={NAME}-={VERSION}.zip']
+    - $: [glab, release, create, --notes-file, CHANGELOG.md, 'v={VERSION}', '={BUILD_DIR}/={NAME}-={VERSION}.zip']
 
   version:
     doc: "Prompt for release version"
