@@ -8,6 +8,7 @@ properties:
   ARC_DIR: 'arc'
   ARC_FILES:
     =DOC_DIR: ['README.pdf']
+    =BUILD_DIR: ['bin/*']
   GITLAB_HOSTNAME: 'gitlab.datalf.chat'
 
 targets:
