@@ -100,5 +100,5 @@ targets:
     depends: [branch, version, clean, lint, test]
     doc: "Perform a release"
     steps:
-    - $: [git, tag, 'v={VERSION}']
+    - $: [git, tag, =VERSION]
     - $: [git, push, --tags]

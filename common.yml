@@ -69,7 +69,7 @@ targets:
     - 'tag = VERSION'
     - if: 'exists("go.mod")'
       then:
-      - 'tag = "v={tag}"'
+      - 'tag = "v={VERSION}"'
     - $: [glab, auth, login, --token, '={env("GLAB_TOKEN")}', --hostname, =GITLAB_HOSTNAME]
     - $: [glab, release, create, --notes-file, CHANGELOG.md, =tag, '={BUILD_DIR}/={NAME}-={VERSION}.zip']
 
