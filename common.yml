@@ -23,6 +23,24 @@ targets:
       then:
       - throw: "We must be on branch ={MAIN_BRANCH} to perform release"
 
+  pushed:
+    doc: "Check that everything was committed and pushed in Git"
+    steps:
+    - $: [git, status, --porcelain]
+      1=: status
+      1x: true
+    - if: 'trim(status) != ""'
+      then:
+      - throw: "Some changes were not committed in Git"
+    - $: [git, fetch]
+      3x: true
+    - $: [git, rev-list, '@{u}..HEAD']
+      1=: commits
+      1x: true
+    - if: 'trim(commits) != ""'
+      then:
+      - throw: "Some commits were not pushed in Git"
+
   doc:
     doc: "Build PDF documentation"
     steps:
@@ -91,7 +109,7 @@ targets:
       to: VERSION
 
   release:
-    depends: [branch, version, clean, lint, test, archive, deploy]
+    depends: [branch, pushed, version, clean, lint, test, archive, deploy]
     doc: "Perform a release"
     steps:
     - $: [git, pull, --rebase]
