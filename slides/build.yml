@@ -7,13 +7,13 @@ configuration: '~/.neon/github.yml'
 
 properties:
   TITLE:      "Slides Title"
-  OPTIONS:    '{ratio: "16:9"}'
   # OPTIONS:    '{ratio: "4:3"}'
-  # BG_IMAGE:   'path/to/background-image.png'
-  # BG_ALPHA:   100
-  # BG_WIDTH:   50
-  # BG_IMAGE_X: 50
-  # BG_IMAGE_Y: 50
-  # BG_COLOR:   '#FFFFFF'
-  # TEXT_COLOR: '#000000'
-  # LINK_COLOR: '#0000FF'
+  OPTIONS:    '{ratio: "16:9"}'
+  BG_IMAGE:   'img/logo-sfbx.png'
+  BG_ALPHA:   100
+  BG_WIDTH:   20
+  BG_IMAGE_X: 85
+  BG_IMAGE_Y: 85
+  BG_COLOR:   '#000020'
+  TEXT_COLOR: '#FFFFFF'
+  LINK_COLOR: '#AAAA00'

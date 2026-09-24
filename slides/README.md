@@ -48,12 +48,12 @@ Content is written with standard [Markdown syntax](https://github.com/adam-p/mar
 To print a picture, put it in the *img* directory and integrate with following syntax:
 
 ```md
-![The Author](img/casa.png)
+![The Logo](img/logo-sfbx.png)
 ```
 
 Which will render as:
 
-![The Author](img/casa.png)
+![The Logo](img/logo-sfbx.png)
 
 ---
 ## Tables
